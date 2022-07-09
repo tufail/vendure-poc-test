@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { CustomFieldConfig, OrderDetail, ServerConfigService } from '@vendure/admin-ui/core';
+import { CustomFieldConfig, ServerConfigService } from '@vendure/admin-ui/core';
 import { isObject } from '@vendure/common/lib/shared-utils';
+import  {OrderDetail} from '../../generated-types'
 
 @Component({
     selector: 'vdr-fulfillment-detail',
@@ -31,7 +32,7 @@ export class FulfillmentDetailComponent implements OnInit, OnChanges {
     }
 
     get items(): Array<{ name: string; quantity: number }> {
-        const itemMap = new Map<string, number>();
+        const itemMap = new Map<string, number>(); 
         const fulfillmentItemIds = this.fulfillment?.orderItems.map(i => i.id);
         for (const line of this.order.lines) {
             for (const item of line.items) {

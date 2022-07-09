@@ -16,6 +16,7 @@ export class FulfillmentCardComponent {
         if (!this.fulfillment) {
             return;
         }
+        debugger;
         const { nextStates } = this.fulfillment;
         const namedStateOrDefault = (targetState: string) =>
             nextStates.includes(targetState) ? targetState : nextStates[0];

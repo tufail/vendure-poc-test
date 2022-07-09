@@ -2,39 +2,43 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker';
+import gql from 'graphql-tag';
 import {
     BaseDetailComponent,
     CancelOrder,
     CustomFieldConfig,
     DataService,
     EditNoteDialogComponent,
-    GetOrderHistory,
-    GetOrderQuery,
+    GetOrderHistory, 
     HistoryEntry,
     HistoryEntryType,
     ModalService,
-    NotificationService,
-    Order,
-    OrderDetail,
-    OrderDetailFragment,
-    OrderLineFragment,
+    NotificationService, 
     Refund,
     RefundOrder,
     ServerConfigService,
     SortOrder,
 } from '@vendure/admin-ui/core';
+import {Order,
+    GetOrderQuery,
+    OrderDetail,
+    OrderDetailFragment,
+    OrderLineFragment} from '../../generated-types'
 import { pick } from '@vendure/common/lib/pick';
 import { assertNever, summate } from '@vendure/common/lib/shared-utils';
 import { EMPTY, merge, Observable, of, Subject } from 'rxjs';
 import { map, mapTo, startWith, switchMap, take } from 'rxjs/operators';
-
+// import {OrderFulfilmentService} from '../../providers/order-fulfilment.service'
 import { OrderTransitionService } from '@vendure/admin-ui/order';
 import { AddManualPaymentDialogComponent } from '@vendure/admin-ui/order';
 import { CancelOrderDialogComponent } from '@vendure/admin-ui/order';
-import { FulfillOrderDialogComponent } from '@vendure/admin-ui/order';
+import { FulfillOrderDialogComponent } from '../fulfill-order-dialog/fulfill-order-dialog.component';
 import { OrderProcessGraphDialogComponent } from '@vendure/admin-ui/order';
 import { RefundOrderDialogComponent } from '@vendure/admin-ui/order';
-import { SettleRefundDialogComponent } from '@vendure/admin-ui/order';
+import { SettleRefundDialogComponent } from '@vendure/admin-ui/order'; 
+import  { UpdateProductVariants, GetOrder } from '../../generated-types';
+import {UPDATE_PRODUCT_VARIANTS} from '@vendure/admin-ui/core'
+import { GET_ORDER } from '../../providers/routing/order-detail.resolver';
 
 @Component({
     selector: 'vdr-order-detail',
@@ -74,18 +78,18 @@ export class OrderDetailComponent
         protected dataService: DataService,
         private notificationService: NotificationService,
         private modalService: ModalService,
-        private orderTransitionService: OrderTransitionService,
+        private orderTransitionService: OrderTransitionService, 
     ) {
         super(route, router, serverConfigService, dataService);
     }
 
     ngOnInit() {
         this.init();
-        this.entity$.pipe(take(1)).subscribe(order => {
+        this.entity$.pipe(take(1)).subscribe(order => { 
             if (order.state === 'Modifying') {
                 this.router.navigate(['./', 'modify'], { relativeTo: this.route });
             }
-        });
+        }); 
         this.customFields = this.getCustomFieldConfig('Order');
         this.orderLineCustomFields = this.getCustomFieldConfig('OrderLine');
         this.history$ = this.fetchHistory.pipe(
@@ -318,7 +322,7 @@ export class OrderDetailComponent
             });
     }
 
-    fulfillOrder() {
+    async fulfillOrder() { 
         this.entity$
             .pipe(
                 take(1),
@@ -329,9 +333,9 @@ export class OrderDetailComponent
                             order,
                         },
                     });
-                }),
+                }), 
                 switchMap(input => {
-                    if (input) {
+                    if (input) {   
                         return this.dataService.order.createFulfillment(input);
                     } else {
                         return of(undefined);
@@ -344,6 +348,7 @@ export class OrderDetailComponent
                     const { addFulfillmentToOrder } = result;
                     switch (addFulfillmentToOrder.__typename) {
                         case 'Fulfillment':
+
                             this.notificationService.success(_('order.create-fulfillment-success'));
                             break;
                         case 'EmptyOrderLineSelectionError':
@@ -368,11 +373,61 @@ export class OrderDetailComponent
             });
     }
 
+    getItems(fulfillment:any, order:any): Array<{ id: string; quantity: number }> {
+        const itemMap = new Map<string, number>(); 
+        const fulfillmentItemIds = fulfillment?.orderItems.map(i => i.id);
+        for (const line of  order.lines) {
+            for (const item of line.items) {
+                if (fulfillmentItemIds?.includes(item.id)) {
+                    const count = itemMap.get(line.productVariant.id);
+                    if (count != null) {
+                        itemMap.set(line.id, count + 1);
+                    } else {
+                        itemMap.set(line.productVariant.id, 1);
+                    }
+                }
+            }
+        }
+        return Array.from(itemMap.entries()).map(([id, quantity]) => ({ id, quantity }));
+    }
+
     transitionFulfillment(id: string, state: string) {
+        debugger;
+        
+        
+
         this.dataService.order
             .transitionFulfillmentToState(id, state)
             .pipe(switchMap(result => this.refetchOrder(result)))
-            .subscribe(() => {
+            .subscribe((res: any) => {
+                debugger;
+               
+                let fulfillment:any = res?.order?.fulfillments.find((f:any) => {
+                    if (f.id == id) {
+                        return f;
+                    }
+                }); 
+                let inputVariants:{id: any, customFields: any}[] = [];
+                let cancelItems:any = this.getItems(fulfillment, res?.order);
+                if (cancelItems && cancelItems.length) {
+                    let location: string = fulfillment.customFields?.location; 
+                    res.order.lines.map((item:any)=>{
+                        cancelItems.map((orderline:any)=>{
+                            if (orderline.id === item.productVariant.id) { 
+                                let totalQty = item.productVariant.customFields[location] + orderline.quantity;
+                                inputVariants.push({id: item.productVariant.id, customFields:{[location]: totalQty > 0 ? totalQty: 0}});
+                            } 
+                        }) 
+                    }) 
+                } 
+
+                let resd = this.dataService.mutate<UpdateProductVariants.Mutation, UpdateProductVariants.Variables>(
+                    UPDATE_PRODUCT_VARIANTS,
+                    {
+                        input: inputVariants,
+                    },
+                ).subscribe();
+
                 this.notificationService.success(_('order.successfully-updated-fulfillment'));
             });
     }
@@ -498,6 +553,7 @@ export class OrderDetailComponent
             .pipe(
                 switchMap(input => {
                     if (input) {
+                        console.log(input);
                         return this.dataService.order.cancelOrder(input);
                     } else {
                         return of(undefined);
@@ -580,7 +636,12 @@ export class OrderDetailComponent
     private refetchOrder(result: object | undefined): Observable<GetOrderQuery | undefined> {
         this.fetchHistory.next();
         if (result) {
-            return this.dataService.order.getOrder(this.id).single$;
+            return this.dataService.query<GetOrder.Query, GetOrder.Variables>(GET_ORDER, { id: this.id }).mapSingle(result=> result)
+            // return this.dataService.order.getOrder(this.id).single$;
+        // return this.dataService
+        // .query<GetOrder.Query, GetOrder.Variables>(GET_ORDER, { id: result.id })
+        // .mapStream((data) => data.order).subscribe(result=> result);
+ 
         } else {
             return of(undefined);
         }

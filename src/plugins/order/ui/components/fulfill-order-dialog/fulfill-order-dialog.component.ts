@@ -8,11 +8,14 @@ import {
     DataService,
     Dialog,
     FulfillOrderInput,
-    GlobalFlag,
-    OrderDetail,
-    OrderDetailFragment,
+    GlobalFlag,  
     toConfigurableOperationInput,
 } from '@vendure/admin-ui/core';
+import { filter, mapTo } from 'rxjs/operators';
+import {OrderDetailFragment} from '../../generated-types'
+
+import  { OrderDetail, UpdateProductVariants } from '../../generated-types';
+import {UPDATE_PRODUCT_VARIANTS} from '@vendure/admin-ui/core'
 
 @Component({
     selector: 'vdr-fulfill-order-dialog',
@@ -25,21 +28,30 @@ export class FulfillOrderDialogComponent implements Dialog<FulfillOrderInput>, O
     fulfillmentHandlerDef: ConfigurableOperationDefinition;
     fulfillmentHandler: ConfigurableOperation;
     fulfillmentHandlerControl = new FormControl();
-    fulfillmentQuantities: { [lineId: string]: { fulfillCount: number; max: number } } = {};
+    fulfillmentQuantities: { [lineId: string]: { fulfillCount: number; max: number, variantId: number } } = {};
 
     // Provided by modalService.fromComponent() call
     order: OrderDetailFragment;
-
-    constructor(private dataService: DataService, private changeDetector: ChangeDetectorRef) {}
+    locations: { id: number, name: string }[] = [];
+ 
+    constructor(private dataService: DataService, private changeDetector: ChangeDetectorRef) {   
+    }
 
     ngOnInit(): void {
-        this.dataService.settings.getGlobalSettings().single$.subscribe(({ globalSettings }) => {
+        this.locations = [{ "id": 0, "name": "Location 1" },
+        { "id": 1, "name": "Location 2" },
+        { "id": 2, "name": "Location 3" }];
+        debugger;
+        this.dataService.settings.getGlobalSettings().single$.subscribe(({ globalSettings }) => { 
             this.fulfillmentQuantities = this.order.lines.reduce((result, line) => {
-                const fulfillCount = this.getFulfillableCount(line, globalSettings.trackInventory);
+              
+                const fulfillCount = this.getFulfillableCount(line, globalSettings.trackInventory); 
+                
                 return {
                     ...result,
-                    [line.id]: { fulfillCount, max: fulfillCount },
+                    [line.id]: { fulfillCount, max: fulfillCount, variantId: line.id },
                 };
+                  
             }, {});
             this.changeDetector.markForCheck();
         });
@@ -59,7 +71,7 @@ export class FulfillOrderDialogComponent implements Dialog<FulfillOrderInput>, O
     }
 
     getFulfillableCount(line: OrderDetail.Lines, globalTrackInventory: boolean): number {
-        const { trackInventory, stockOnHand } = line.productVariant;
+        const { trackInventory, stockOnHand, customFields } = line.productVariant; 
         const effectiveTracInventory =
             trackInventory === GlobalFlag.INHERIT ? globalTrackInventory : trackInventory === GlobalFlag.TRUE;
 
@@ -68,7 +80,7 @@ export class FulfillOrderDialogComponent implements Dialog<FulfillOrderInput>, O
     }
 
     getUnfulfilledCount(line: OrderDetail.Lines): number {
-        const fulfilled = line.items.reduce((sum, item) => sum + (item.fulfillment ? 1 : 0), 0);
+        const fulfilled = line.items.reduce((sum, item) => sum + (item.fulfillment ? 1 : 0), 0); 
         return line.quantity - fulfilled;
     }
 
@@ -86,20 +98,42 @@ export class FulfillOrderDialogComponent implements Dialog<FulfillOrderInput>, O
     }
 
     select() {
+        debugger;
+        console.log(this.fulfillmentQuantities)
         const lines = Object.entries(this.fulfillmentQuantities).map(([orderLineId, { fulfillCount }]) => ({
             orderLineId,
             quantity: fulfillCount,
         }));
+
+        let location = this.fulfillmentHandlerControl.value.args.customFieldsLocation ? this.fulfillmentHandlerControl.value.args.customFieldsLocation : 'location1';
+        let inputVariants:{id: any, customFields: any}[] = [];
+        this.order.lines.map((item)=>{
+            lines.map((orderline)=>{
+                if (orderline.orderLineId === item.id) { 
+                    let totalQty = item.productVariant.customFields[location] - orderline.quantity;
+                    inputVariants.push({id: item.productVariant.id, customFields:{[location]: totalQty > 0 ? totalQty: 0}});
+                } 
+            }) 
+        })   
+        let res = this.dataService.mutate<UpdateProductVariants.Mutation, UpdateProductVariants.Variables>(
+            UPDATE_PRODUCT_VARIANTS,
+            {
+                input: inputVariants,
+            },
+        ).subscribe(res=> res);
+         
+
         this.resolveWith({
             lines,
             handler: toConfigurableOperationInput(
                 this.fulfillmentHandler,
                 this.fulfillmentHandlerControl.value,
-            ),
+            )
         });
     }
 
     cancel() {
+        debugger;
         this.resolveWith();
     }
 }

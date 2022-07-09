@@ -15,6 +15,7 @@ import { ExtendedShipmentsPlugin } from '@artcoded/vendure-extended-shipments-pl
 import { customAdminUi } from './compile-admin-ui'; 
 import { LocationPlugin } from './plugins/location/plugin';
 import { OrdersPlugin } from './plugins/order/plugin';
+import { manualFulfillmentLocationHandler } from './manual-fulfillment-location-handler';
 
 const IS_PROD = path.basename(__dirname) === 'dist';
 
@@ -47,11 +48,21 @@ export const config: VendureConfig = {
         username: 'root',
         password: '',
         migrations: [getMigrationsPath()],
-    },
+    }, 
     paymentOptions: {
         paymentMethodHandlers: [dummyPaymentHandler],
     },
-    customFields: {},
+    shippingOptions: {
+        fulfillmentHandlers: [manualFulfillmentLocationHandler],
+    },
+    customFields: {
+        Fulfillment: [
+            {   
+                name: "location",
+                type: "string"
+            }
+        ]
+    },
     plugins: [
         AssetServerPlugin.init({
             route: 'assets',

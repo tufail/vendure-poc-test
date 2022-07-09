@@ -32,5 +32,7 @@
   },
    
  ];
+
+ 
  
  export default ProductVariantCustomFields;

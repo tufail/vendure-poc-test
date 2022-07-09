@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { marker as _ } from '@biesbjerg/ngx-translate-extract-marker';
 import {
     BaseListComponent,
-    DataService,
-    GetOrderList,
+    DataService, 
     LocalStorageService,
     OrderListOptions,
     ServerConfigService,
     SortOrder,
 } from '@vendure/admin-ui/core';
+
+import { GetOrderList } from '../generated-types';
 import { Order } from '@vendure/common/lib/generated-types';
 import { merge, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, map, skip, takeUntil, tap } from 'rxjs/operators';

@@ -1,6 +1,6 @@
-<ng-template vdrDialogTitle>{{ 'order.fulfill-order' | translate }}</ng-template>
+<ng-template vdrDialogTitle>{{ 'order.fulfill-order' | translate }}  {{ ' asd' }}</ng-template>
 
-<div class="fulfillment-wrapper">
+<div class="fulfillment-wrapper"> 
     <div class="order-table">
         <table class="table">
             <thead>
@@ -24,7 +24,12 @@
                 <td class="align-middle name">{{ line.productVariant.name }}</td>
                 <td class="align-middle sku">{{ line.productVariant.sku }}</td>
                 <td class="align-middle quantity">{{ getUnfulfilledCount(line) }}</td>
-                <td class="align-middle quantity">{{ line.productVariant.stockOnHand }}</td>
+                <td class="align-middle quantity">
+                    <strong>{{ line.productVariant.stockOnHand }}</strong><br />
+                    <i>location 1: {{ line.productVariant.customFields.location1 }}</i><br />
+                    <i>location 2: {{ line.productVariant.customFields.location2 }}</i><br />
+                    <i>location 3: {{ line.productVariant.customFields.location3 }}</i><br />
+                </td>
                 <td class="align-middle fulfil">
                     <input
                         *ngIf="fulfillmentQuantities[line.id]"
@@ -36,13 +41,20 @@
                     />
                 </td>
             </tr>
-        </table>
+        </table> 
     </div>
     <div class="shipping-details">
         <vdr-formatted-address [address]="order.shippingAddress"></vdr-formatted-address>
         <h6>{{ 'order.shipping-method' | translate }}</h6>
         {{ order.shippingLines[0]?.shippingMethod?.name }}
         <strong>{{ order.shipping | localeCurrency: order.currencyCode }}</strong>
+        <p> 
+           <!-- <select [formControl]="fulfillmentHandlerControl"> 
+            <option *ngFor="let item of locations" [ngValue]="item">
+                <b>{{ item.name }}</b> 
+            </option>
+        </select> -->
+        </p>
         <vdr-configurable-input
             [operationDefinition]="fulfillmentHandlerDef"
             [operation]="fulfillmentHandler"
