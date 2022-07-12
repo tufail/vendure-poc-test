@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
+import gql from 'graphql-tag';
 import {
     configurableDefinitionToInstance,
     ConfigurableOperation,
@@ -13,9 +14,9 @@ import {
 } from '@vendure/admin-ui/core';
 import { filter, mapTo } from 'rxjs/operators';
 import {OrderDetailFragment} from '../../generated-types'
-
-import  { OrderDetail, UpdateProductVariants } from '../../generated-types';
-import {UPDATE_PRODUCT_VARIANTS} from '@vendure/admin-ui/core'
+import { Observable } from 'rxjs';
+import  { OrderDetail, UpdateProductVariants, GetLocation,  GetLocations } from '../../generated-types';
+import {UPDATE_PRODUCT_VARIANTS} from '@vendure/admin-ui/core' 
 
 @Component({
     selector: 'vdr-fulfill-order-dialog',
@@ -31,17 +32,37 @@ export class FulfillOrderDialogComponent implements Dialog<FulfillOrderInput>, O
     fulfillmentQuantities: { [lineId: string]: { fulfillCount: number; max: number, variantId: number } } = {};
 
     // Provided by modalService.fromComponent() call
-    order: OrderDetailFragment;
-    locations: { id: number, name: string }[] = [];
- 
+    order: OrderDetailFragment; 
+    locations$: Observable<any>;
+
     constructor(private dataService: DataService, private changeDetector: ChangeDetectorRef) {   
     }
 
-    ngOnInit(): void {
-        this.locations = [{ "id": 0, "name": "Location 1" },
-        { "id": 1, "name": "Location 2" },
-        { "id": 2, "name": "Location 3" }];
-        debugger;
+    ngOnInit(): void { 
+        this.locations$ =  this.dataService
+                    .query<GetLocations.Query, GetLocations.Variables>(
+                        gql`
+                        query GetLocations($options: LocationListOptions) {
+                            locations(options: $options) {
+                                items {
+                                    id
+                                    name 
+                                    stockLocation
+                                    createdAt
+                                }
+                                totalItems
+                            }
+                        }
+                    `
+                    ).mapStream(result =>  {
+                        let res: {} = {};
+                        if (result.locations.items && result.locations.items.length) {
+                            result.locations.items.map((item)=>{
+                                res[item.stockLocation] = item.name;
+                            }) 
+                        }
+                        return res; 
+                    });
         this.dataService.settings.getGlobalSettings().single$.subscribe(({ globalSettings }) => { 
             this.fulfillmentQuantities = this.order.lines.reduce((result, line) => {
               
@@ -105,7 +126,7 @@ export class FulfillOrderDialogComponent implements Dialog<FulfillOrderInput>, O
             quantity: fulfillCount,
         }));
 
-        let location = this.fulfillmentHandlerControl.value.args.customFieldsLocation ? this.fulfillmentHandlerControl.value.args.customFieldsLocation : 'location1';
+        let location = this.fulfillmentHandlerControl.value.args.location ? this.fulfillmentHandlerControl.value.args.location : 'location1';
         let inputVariants:{id: any, customFields: any}[] = [];
         this.order.lines.map((item)=>{
             lines.map((orderline)=>{

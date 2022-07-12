@@ -1,8 +1,8 @@
 <ng-template vdrDialogTitle>{{ 'order.fulfill-order' | translate }}  {{ ' asd' }}</ng-template>
-
+ 
 <div class="fulfillment-wrapper"> 
     <div class="order-table">
-        <table class="table">
+        <table class="table"  *ngIf="locations$ | async; let locations" >
             <thead>
                 <tr>
                     <th></th>
@@ -26,9 +26,10 @@
                 <td class="align-middle quantity">{{ getUnfulfilledCount(line) }}</td>
                 <td class="align-middle quantity">
                     <strong>{{ line.productVariant.stockOnHand }}</strong><br />
-                    <i>location 1: {{ line.productVariant.customFields.location1 }}</i><br />
-                    <i>location 2: {{ line.productVariant.customFields.location2 }}</i><br />
-                    <i>location 3: {{ line.productVariant.customFields.location3 }}</i><br />
+                    <i>{{ locations['location1'] }}: {{ line.productVariant.stockOnHand - (line.productVariant.customFields.location2 + line.productVariant.customFields.location3) }}</i><br />
+                    <i *ngIf="line.productVariant.customFields.location2 > 0 && locations['location2']">{{ locations['location2'] }}: {{ line.productVariant.customFields.location2 }}</i><br />
+                    <i *ngIf="line.productVariant.customFields.location3 > 0 && locations['location3']">{{ locations['location3'] }}: {{ line.productVariant.customFields.location3 }}</i><br />
+                
                 </td>
                 <td class="align-middle fulfil">
                     <input

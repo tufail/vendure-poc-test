@@ -13,8 +13,8 @@ export class LocationEntity extends VendureEntity {
     }
 
     @Column()
-    name: string;
+    name: string; 
 
     @Column()
-    isDefault: boolean
+    stockLocation: string;
 }

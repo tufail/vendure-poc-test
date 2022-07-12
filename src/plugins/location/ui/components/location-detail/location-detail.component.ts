@@ -40,7 +40,8 @@ export class LocationDetailComponent extends BaseDetailComponent<Location> imple
         super(route, router, serverConfigService, dataService);
         this.detailForm = this.formBuilder.group({
             name: ['', Validators.required],
-            isDefault: ''
+            isDefault: '',
+            stockLocation: ''
         });
     }
 
@@ -55,7 +56,8 @@ export class LocationDetailComponent extends BaseDetailComponent<Location> imple
         const formValue = this.detailForm.value;
         const location: CreateLocationInput = {
             name: formValue.name,
-            isDefault: formValue.isDefault
+            isDefault: formValue.isDefault,
+            stockLocation: formValue.stockLocation
         };
         this.dataService
             .mutate<CreateLocation.Mutation, CreateLocation.Variables>(CREATE_LOCATION, { input: location })
@@ -97,12 +99,11 @@ export class LocationDetailComponent extends BaseDetailComponent<Location> imple
 
     private saveChanges(): Observable<boolean> {
         if (this.detailForm.dirty) {
-            const formValue = this.detailForm.value;
-            debugger;
+            const formValue = this.detailForm.value; 
             const input: UpdateLocationInput = {
                 id: this.id,
-                name: formValue.name,
-                isDefault:  formValue.isDefault
+                name: formValue.name, 
+                stockLocation: formValue.stockLocation
             };
             return this.dataService
                 .mutate<UpdateLocation.Mutation, UpdateLocation.Variables>(UPDATE_LOCATION, {
@@ -116,8 +117,8 @@ export class LocationDetailComponent extends BaseDetailComponent<Location> imple
 
     protected setFormValues(entity: Location): void {
         this.detailForm.patchValue({
-            name: entity.name,
-            isDefault: entity.isDefault
+            name: entity.name, 
+            stockLocation: entity.stockLocation
         });
     }
 }

@@ -5,8 +5,8 @@ export const commonApiExtensions = gql`
         id: ID!
         createdAt: DateTime!
         updatedAt: DateTime!
-        name: String!
-        isDefault: Boolean!
+        name: String! 
+        stockLocation: String!
     }
 
     type LocationList implements PaginatedList {
@@ -36,13 +36,13 @@ export const adminApiExtensions = gql`
     }
 
     input CreateLocationInput {
-        name: String!
-        isDefault: Boolean!
+        name: String! 
+        stockLocation: String!
     }
 
     input UpdateLocationInput {
         id: ID!
-        name: String!
-        isDefault: Boolean!
+        name: String! 
+        stockLocation: String!
     }
 `;

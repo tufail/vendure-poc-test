@@ -1,10 +1,11 @@
 import { LanguageCode } from '@vendure/common/lib/generated-types';
 
+
 import { FulfillmentHandler } from '@vendure/core';
 
 export const manualFulfillmentLocationHandler = new FulfillmentHandler({
     code: 'manual-fulfillment',
-    description: [{ languageCode: LanguageCode.en, value: 'Manually enter fulfillment details2' }],
+    description: [{ languageCode: LanguageCode.en, value: 'Manually enter fulfillment details' }],
     args: {
         method: {
             type: 'string',
@@ -14,8 +15,16 @@ export const manualFulfillmentLocationHandler = new FulfillmentHandler({
             type: 'string',
             required: false,
         },
-        customFieldsLocation: {
-                type: 'string'  
+        location: {
+                type: 'string', 
+                ui: {
+                    component:'location-dropdown-input',
+                    options:  [ 
+                                { value: 'location1' },
+                                { value: 'location2' },
+                                { value: 'location3' }
+                            ] 
+                }
         },
     },
     createFulfillment: (ctx, orders, orderItems, args) => {
@@ -23,7 +32,7 @@ export const manualFulfillmentLocationHandler = new FulfillmentHandler({
             method: args.method,
             trackingCode: args.trackingCode,
             customFields: {
-                location: args.customFieldsLocation
+                location: args.location
             }
         };
     },

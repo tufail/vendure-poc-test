@@ -4502,8 +4502,8 @@ export type Location = Node & {
   id: Scalars['ID'];
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
-  name: Scalars['String'];
-  isDefault:  Scalars['Boolean'];
+  name: Scalars['String']; 
+  stockLocation: Scalars['String'];
 };
 
 export type LocationList = PaginatedList & {
@@ -4515,12 +4515,13 @@ export type LocationList = PaginatedList & {
 export type CreateLocationInput = {
   name: Scalars['String'];
   isDefault:  Scalars['Boolean'];
+  stockLocation: Scalars['String'];
 };
 
 export type UpdateLocationInput = {
   id: Scalars['ID'];
-  name: Scalars['String'];
-  isDefault:  Scalars['Boolean'];
+  name: Scalars['String']; 
+  stockLocation: Scalars['String'];
 };
 
 export type AdministratorListOptions = {
@@ -5037,7 +5038,13 @@ export namespace GetLocation {
   export type Variables = GetLocationQueryVariables;
   export type Query = GetLocationQuery;
   export type Location = (NonNullable<GetLocationQuery['location']>);
-}
+} 
+
+
+export type LocationsFragment = (
+  { __typename?: 'Locations' }
+  & Pick<Location, 'id' | 'name' | 'stockLocation'>
+);
 
 export type CreateLocationMutationVariables = Exact<{
   input: CreateLocationInput;
@@ -5048,7 +5055,7 @@ export type CreateLocationMutation = (
   { __typename?: 'Mutation' }
   & { createLocation: (
     { __typename?: 'Location' }
-    & Pick<Location, 'id' | 'name'>
+    & Pick<Location, 'id' | 'name' | 'stockLocation'>
   ) }
 );
 
@@ -5061,7 +5068,7 @@ export type UpdateLocationMutation = (
   { __typename?: 'Mutation' }
   & { updateLocation: (
     { __typename?: 'Location' }
-    & Pick<Location, 'id' | 'name'>
+    & Pick<Location, 'id' | 'name' | 'stockLocation'>
   ) }
 );
 
@@ -5077,7 +5084,7 @@ export type GetLocationsQuery = (
     & Pick<LocationList, 'totalItems'>
     & { items: Array<(
       { __typename?: 'Location' }
-      & Pick<Location, 'id' | 'name' | 'isDefault' | 'createdAt'>
+      & Pick<Location, 'id' | 'name' | 'stockLocation' | 'createdAt'>
     )> }
   ) }
 );
@@ -5091,6 +5098,6 @@ export type GetLocationQuery = (
   { __typename?: 'Query' }
   & { location?: Maybe<(
     { __typename?: 'Location' }
-    & Pick<Location, 'id' | 'name' | 'isDefault' | 'createdAt'>
+    & Pick<Location, 'id' | 'name' | 'stockLocation' | 'createdAt'>
   )> }
 );

@@ -4,14 +4,14 @@ import { PluginInitOptions } from './types';
 import { AdminUiExtension } from '@vendure/ui-devkit/compiler';
 import { PLUGIN_INIT_OPTIONS } from './constants';
 import { OrderService } from '@vendure/core';
-// import {OrderFulfilmentService} from './ui/providers/order-fulfilment.service'
+import { LocationService } from '../location/service/location.service';
 
 @VendurePlugin({
     imports: [PluginCommonModule],  
     configuration: (config) => OrdersPlugin.configure(config),
     providers: [
         OrderService, 
-        // OrderFulfilmentService
+        LocationService
     ],
 })
 export class OrdersPlugin {

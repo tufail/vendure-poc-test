@@ -4503,6 +4503,7 @@ export type Location = Node & {
   createdAt: Scalars['DateTime'];
   updatedAt: Scalars['DateTime'];
   name: Scalars['String'];
+  stockLocation: Scalars['String'];
 };
 
 export type LocationList = PaginatedList & {
@@ -4518,7 +4519,8 @@ export type CreateLocationInput = {
 export type UpdateLocationInput = {
   id: Scalars['ID'];
   name: Scalars['String'];
-  isDefault: Scalars['Boolean']
+  isDefault: Scalars['Boolean'];
+  stockLocation: Scalars['String'];
 };
 
 export type AdministratorListOptions = {
@@ -5033,7 +5035,7 @@ export type CreateLocationMutation = (
   { __typename?: 'Mutation' }
   & { createLocation: (
     { __typename?: 'Location' }
-    & Pick<Location, 'id' | 'name' | 'isDefault'>
+    & Pick<Location, 'id' | 'name' | 'isDefault' | 'stockLocation'>
   ) }
 );
 
@@ -5046,6 +5048,6 @@ export type UpdateLocationMutation = (
   { __typename?: 'Mutation' }
   & { updateLocation: (
     { __typename?: 'Location' }
-    & Pick<Location, 'id' | 'name' | 'isDefault'>
+    & Pick<Location, 'id' | 'name' | 'isDefault' | 'stockLocation'>
   ) }
 );

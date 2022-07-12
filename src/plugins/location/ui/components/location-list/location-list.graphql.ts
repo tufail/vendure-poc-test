@@ -5,8 +5,8 @@ export const GET_LOCATIONS = gql`
         locations(options: $options) {
             items {
                 id
-                name
-                isDefault
+                name 
+                stockLocation
                 createdAt
             }
             totalItems

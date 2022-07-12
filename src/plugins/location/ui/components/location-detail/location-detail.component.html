@@ -36,17 +36,13 @@
                         formControlName="name"
                     />
                 </vdr-form-field>
-                <vdr-form-field label="Default" for="isDefault" [readOnlyToggle]="!(isNew$ | async)">
-                    <clr-toggle-wrapper>
-                        <input
-                            type="checkbox"
-                            id="isDefault"
-                            clrToggle
-                            name="isDefault"
-                            formControlName="isDefault" 
-                        />
-                    </clr-toggle-wrapper>
-                </vdr-form-field>
+                <vdr-form-field label="Stock Location" for="stockLocation">
+                    <select class="form-control" name="stockLocation" id="stockLocation" formControlName="stockLocation">
+                        <option value="location1">Location 1</option>
+                        <option value="location2">Location 2</option>
+                        <option value="location3">Location 3</option>
+                    </select>
+                </vdr-form-field> 
             </section>
         </form>
     </div>

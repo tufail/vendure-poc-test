@@ -6,6 +6,7 @@ export const CREATE_LOCATION = gql`
             id
             name
             isDefault
+            stockLocation
         }
     }
 `;
@@ -16,6 +17,7 @@ export const UPDATE_LOCATION = gql`
             id
             name
             isDefault
+            stockLocation
         }
     }
 `;

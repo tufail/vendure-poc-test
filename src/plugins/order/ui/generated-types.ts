@@ -3716,6 +3716,8 @@ export declare type Query = {
     userStatus: UserStatus;
     zone?: Maybe<Zone>;
     zones: Array<Zone>;
+    locations: LocationList;
+    location?: Maybe<Location>;
 };
 export declare type QueryAdministratorArgs = {
     id: Scalars['ID'];
@@ -9066,4 +9068,91 @@ export declare namespace TestEligibleShippingMethods {
     type Query = TestEligibleShippingMethodsQuery;
     type TestEligibleShippingMethods = NonNullable<(NonNullable<TestEligibleShippingMethodsQuery['testEligibleShippingMethods']>)[number]>;
 }
+
+
+export type Location = Node & {
+    __typename?: 'Location';
+    id: Scalars['ID'];
+    createdAt: Scalars['DateTime'];
+    updatedAt: Scalars['DateTime'];
+    name: Scalars['String']; 
+    stockLocation: Scalars['String'];
+  };
+  
+  export type LocationList = PaginatedList & {
+    __typename?: 'LocationList';
+    items: Array<Location>;
+    totalItems: Scalars['Int'];
+  };
+
+ 
+export namespace GetLocations {
+    export type Variables = GetLocationsQueryVariables;
+    export type Query = GetLocationsQuery;
+    export type Locations = (NonNullable<GetLocationsQuery['locations']>);
+    export type Items = NonNullable<(NonNullable<(NonNullable<GetLocationsQuery['locations']>)['items']>)[number]>;
+}
+
+export namespace GetLocation {
+    export type Variables = GetLocationQueryVariables;
+    export type Query = GetLocationQuery;
+    export type Location = (NonNullable<GetLocationQuery['location']>);
+} 
+
+export type LocationFilterParameter = {
+    createdAt?: Maybe<DateOperators>;
+    updatedAt?: Maybe<DateOperators>;
+    name?: Maybe<StringOperators>;
+  };
+  
+  export type LocationSortParameter = {
+    id?: Maybe<SortOrder>;
+    createdAt?: Maybe<SortOrder>;
+    updatedAt?: Maybe<SortOrder>;
+    name?: Maybe<SortOrder>;
+  };
+  
+export type LocationListOptions = {
+    skip?: Maybe<Scalars['Int']>;
+    take?: Maybe<Scalars['Int']>;
+    sort?: Maybe<LocationSortParameter>;
+    filter?: Maybe<LocationFilterParameter>;
+  };
+
+export type LocationsFragment = (
+    { __typename?: 'Locations' }
+    & Pick<Location, 'id' | 'name' | 'stockLocation'>
+);
+
+
+export type GetLocationsQueryVariables = Exact<{
+  options?: Maybe<LocationListOptions>;
+}>;
+
+
+export type GetLocationsQuery = (
+  { __typename?: 'Query' }
+  & { locations: (
+    { __typename?: 'LocationList' }
+    & Pick<LocationList, 'totalItems'>
+    & { items: Array<(
+      { __typename?: 'Location' }
+      & Pick<Location, 'id' | 'name' | 'stockLocation' | 'createdAt'>
+    )> }
+  ) }
+);
+
+export type GetLocationQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type GetLocationQuery = (
+  { __typename?: 'Query' }
+  & { location?: Maybe<(
+    { __typename?: 'Location' }
+    & Pick<Location, 'id' | 'name' | 'stockLocation' | 'createdAt'>
+  )> }
+);
+
 export {};

@@ -5,29 +5,35 @@
 
  import { LanguageCode, CustomFields } from "@vendure/core";
 
+
+ 
  const ProductVariantCustomFields: CustomFields["ProductVariant"] = [
    {
      name: "location1",
      type: "float",
      min: 0,
+     defaultValue: 0,
      label: [
-       { languageCode: LanguageCode.en, value: "Location 1" }, 
+       { languageCode: LanguageCode.en, value: "Stock on Location 1" }, 
      ],
+     
    },
    {
     name: "location2",
     type: "float",
+    defaultValue: 0,
     min: 0,
     label: [
-      { languageCode: LanguageCode.en, value: "Location 2" }, 
+      { languageCode: LanguageCode.en, value: "Stock on Location 2" }, 
     ],
   },
   {
     name: "location3",
     type: "float",
     min: 0,
+    defaultValue: 0,
     label: [
-      { languageCode: LanguageCode.en, value: "Location 3" }, 
+      { languageCode: LanguageCode.en, value: "Stock on Location 3" }, 
     ],
   },
    

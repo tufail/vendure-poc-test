@@ -59,7 +59,12 @@ export const config: VendureConfig = {
         Fulfillment: [
             {   
                 name: "location",
-                type: "string"
+                type: "string",
+                options: [
+                    { value: 'location1' },
+                    { value: 'location2' },
+                    { value: 'location3' },
+                  ]
             }
         ]
     },

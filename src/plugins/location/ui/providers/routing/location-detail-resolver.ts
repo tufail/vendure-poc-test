@@ -14,8 +14,8 @@ export class LocationDetailResolver extends BaseEntityResolver<GetLocation.Locat
             {
                 id: '',
                 createdAt: new Date(),
-                name: '',
-                isDefault: false
+                name: '', 
+                stockLocation: ''
             },
             (id) =>
                 dataService
